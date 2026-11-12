@@ -445,7 +445,7 @@ gui_strings:
 - label: HINT_PS2LOGO
   string: 只显示与控制台区域匹配的有效碟片标识
 - label: PADEMUCONFIG
-  string: 配置手柄模拟
+  string: 配置手柄
 - label: PADEMU_SETTINGS
   string: 控制器设置
 - label: PADEMU_ENABLE
@@ -695,7 +695,7 @@ gui_strings:
 - label: HDD_HINT
   string: 内置硬盘和外设磁盘无法同时开启
 - label: TXTRENAME
-  string: txt映射列表
+  string: 映射列表
 - label: ABOUT_CHINESE_CONTRIBUTORS
   string: 贡献者名单（第1/2页）
 - label: ABOUT_CONTRIBUTORS_PENDING
@@ -755,7 +755,7 @@ gui_strings:
 - label: AUTODETECT_PS1APPS
   string: 应用程序和PS1自动识别
 - label: AUTO_MODE1
-  string: 自动开启模式1 (提高兼容性)
+  string: 自动开启高兼容模式1
 - label: COVERART_BG_OFF
   string: 背景关
 - label: COVERART_BG_ON
