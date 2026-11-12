@@ -27,11 +27,13 @@ jobs:
       - name: Compile -> make clean release
         run: |
           make --trace clean release
-          if [ -f OPNPS2LD.ELF ]; then
-            cp OPNPS2LD.ELF OPNPS2LD-${{ env.OPL_VERSION }}.ELF
-          elif [ -f opl.elf ]; then
+          # 自动兼容重命名，确保无论生成的是 opl.elf 还是 OPNPS2LD 都能统一
+          if [ -f opl.elf ]; then
+            cp opl.elf FGOPL-${{ env.OPL_VERSION }}.ELF
             cp opl.elf OPNPS2LD-${{ env.OPL_VERSION }}.ELF
-            cp opl.elf OPNPS2LD.ELF
+          elif [ -f OPNPS2LD.ELF ]; then
+            cp OPNPS2LD.ELF FGOPL-${{ env.OPL_VERSION }}.ELF
+            cp OPNPS2LD.ELF OPNPS2LD-${{ env.OPL_VERSION }}.ELF
           fi
 
       - name: Create detailed changelog
@@ -41,9 +43,10 @@ jobs:
         if: ${{ success() }}
         uses: actions/upload-artifact@v4
         with:
-          name: OPNPS2LD
+          name: FGOPL
           path: |
-            OPNPS2LD*.ELF
+            FGOPL-*.ELF
+            OPNPS2LD-*.ELF
 
       - name: Build ISO
         env:
@@ -51,7 +54,8 @@ jobs:
         run: |
           (apk add --no-cache xorriso || (apt-get update && apt-get install -y xorriso))
           mkdir -p iso_root
-          SRC_ELF=$(ls OPNPS2LD*.ELF *.ELF 2>/dev/null | head -n 1)
+          # 自动寻找编译出来的任意 ELF 文件放入 ISO 根目录
+          SRC_ELF=$(ls FGOPL-*.ELF OPNPS2LD*.ELF *.ELF 2>/dev/null | head -n 1)
           cp "$SRC_ELF" iso_root/FENG_001.29 || true
           printf 'BOOT2 = cdrom0:\\FENG_001.29;1\r\nVER = 1.00\r\n' > iso_root/SYSTEM.CNF
           SYSAREA_OPT=""
@@ -104,7 +108,7 @@ jobs:
       - name: Compile -> make ${{ matrix.extra }} ${{ matrix.pademu }} NOT_PACKED=1
         run: |
           make --trace ${{ matrix.pademu }} ${{ matrix.extra }} NOT_PACKED=1
-          mv opl.elf OPNPS2LD-${{ env.OPL_VERSION }}-${{ matrix.pademu }}-${{ matrix.extra }}.ELF
+          mv opl.elf FGOPL-${{ env.OPL_VERSION }}-${{ matrix.pademu }}-${{ matrix.extra }}.ELF
 
       - name: Create detailed changelog
         run: sh ./make_changelog.sh
@@ -112,8 +116,8 @@ jobs:
       - name: Upload variants artifact ELF
         uses: actions/upload-artifact@v4
         with:
-          name: OPNPS2LD-VARIANTS ${{ matrix.pademu }} ${{ matrix.extra }}
-          path: OPNPS2LD*.ELF
+          name: FGOPL-VARIANTS ${{ matrix.pademu }} ${{ matrix.extra }}
+          path: FGOPL*.ELF
 
   merge-variants:
     runs-on: ubuntu-latest
@@ -122,8 +126,8 @@ jobs:
       - name: Merge Artifacts
         uses: actions/upload-artifact/merge@v4
         with:
-          name: OPNPS2LD-VARIANTS
-          pattern: OPNPS2LD-VARIANTS*
+          name: FGOPL-VARIANTS
+          pattern: FGOPL-VARIANTS*
           delete-merged: true
 
   build-lang:
@@ -147,9 +151,9 @@ jobs:
         if: ${{ success() }}
         uses: actions/upload-artifact@v4
         with:
-          name: OPNPS2LD-LANGS
+          name: FGOPL-LANGS
           path: |
-            OPNPS2LD-LANGS-*.zip
+            FGOPL-LANGS-*.zip
 
   build-debug:
     strategy:
@@ -192,14 +196,14 @@ jobs:
       - name: Merge Artifacts
         uses: actions/upload-artifact/merge@v4
         with:
-          name: OPNPS2LD-DEBUG
+          name: FGOPL-DEBUG
           pattern: opl-*
           delete-merged: true
 
   release:
     needs: [build, merge-variants, build-lang]
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    if: startsWith(github.ref, 'refs/tags/v') || github.ref == 'refs/heads/362053534-patch-1' || github.event_name == 'workflow_dispatch'
     steps:
       - name: git checkout
         uses: actions/checkout@v4
@@ -210,11 +214,11 @@ jobs:
         run: |
           echo "OPL_VERSION=$(make oplversion)" >> $GITHUB_ENV
 
-      - name: Download OPNPS2LD
+      - name: Download FGOPL
         uses: actions/download-artifact@v4
         with:
-          name: OPNPS2LD
-          path: OPNPS2LD
+          name: FGOPL
+          path: FGOPL
 
       - name: Download FGOPL-ISO
         uses: actions/download-artifact@v4
@@ -228,31 +232,33 @@ jobs:
           name: INFO
           path: INFO
 
-      - name: Download OPNPS2LD-VARIANTS
+      - name: Download FGOPL-VARIANTS
         uses: actions/download-artifact@v4
         with:
-          name: OPNPS2LD-VARIANTS
-          path: OPNPS2LD-VARIANTS
+          name: FGOPL-VARIANTS
+          path: FGOPL-VARIANTS
 
-      - name: Download OPNPS2LD-LANGS
+      - name: Download FGOPL-LANGS
         uses: actions/download-artifact@v4
         with:
-          name: OPNPS2LD-LANGS
-          path: OPNPS2LD-LANGS
+          name: FGOPL-LANGS
+          path: FGOPL-LANGS
 
       - name: Prepare artifacts for release
         run: |
           echo packing release of OPL ${{ env.OPL_VERSION }}
-          cp INFO/* OPNPS2LD/
-          cp INFO/* OPNPS2LD-VARIANTS/
-          7z a -t7z OPNPS2LD-${{ env.OPL_VERSION }}.7z OPNPS2LD/*
-          7z a -t7z OPNPS2LD-VARIANTS-${{ env.OPL_VERSION }}.7z OPNPS2LD-VARIANTS/*
-          7z a -t7z OPNPS2LD-LANGS-${{ env.OPL_VERSION }}.7z OPNPS2LD-LANGS/*
-          cp -f OPNPS2LD-${{ env.OPL_VERSION }}.7z OPNPS2LD.7z
-          cp -f OPNPS2LD-VARIANTS-${{ env.OPL_VERSION }}.7z OPNPS2LD-VARIANTS.7z
-          cp -f OPNPS2LD-LANGS-${{ env.OPL_VERSION }}.7z OPNPS2LD-LANGS.7z
-          cp -f OPNPS2LD/OPNPS2LD-${{ env.OPL_VERSION }}.ELF OPNPS2LD.ELF
-          cp -f FGOPL-ISO/FGOPL-1.2.9.iso FGOPL-1.2.9.iso
+          cp INFO/* FGOPL/
+          cp INFO/* FGOPL-VARIANTS/
+          7z a -t7z FGOPL-${{ env.OPL_VERSION }}.7z FGOPL/*
+          7z a -t7z FGOPL-VARIANTS-${{ env.OPL_VERSION }}.7z FGOPL-VARIANTS/*
+          7z a -t7z FGOPL-LANGS-${{ env.OPL_VERSION }}.7z FGOPL-LANGS/*
+          cp -f FGOPL-${{ env.OPL_VERSION }}.7z FGOPL.7z
+          cp -f FGOPL-VARIANTS-${{ env.OPL_VERSION }}.7z FGOPL-VARIANTS.7z
+          cp -f FGOPL-LANGS-${{ env.OPL_VERSION }}.7z FGOPL-LANGS.7z
+          # 自动寻找存在的 ELF 并复制为最终发布的 FGOPL.ELF
+          FINAL_ELF=$(ls FGOPL/*.ELF 2>/dev/null | head -n 1)
+          cp -f "$FINAL_ELF" FGOPL.ELF
+          cp -f FGOPL-ISO/FGOPL-1.2.9.iso FGOPL-1.2.9.iso || true
 
       - name: Create prerelease
         if: "!startsWith(github.ref, 'refs/tags/v')"
@@ -263,13 +269,13 @@ jobs:
           automatic_release_tag: "latest"
           title: "${{ env.OPL_VERSION }}"
           files: |
-            OPNPS2LD-${{ env.OPL_VERSION }}.7z
-            OPNPS2LD-VARIANTS-${{ env.OPL_VERSION }}.7z
-            OPNPS2LD-LANGS-${{ env.OPL_VERSION }}.7z
-            OPNPS2LD.7z
-            OPNPS2LD-VARIANTS.7z
-            OPNPS2LD-LANGS.7z
-            OPNPS2LD.ELF
+            FGOPL-${{ env.OPL_VERSION }}.7z
+            FGOPL-VARIANTS-${{ env.OPL_VERSION }}.7z
+            FGOPL-LANGS-${{ env.OPL_VERSION }}.7z
+            FGOPL.7z
+            FGOPL-VARIANTS.7z
+            FGOPL-LANGS.7z
+            FGOPL.ELF
             FGOPL-1.2.9.iso
 
       - name: Create release
@@ -280,11 +286,11 @@ jobs:
           prerelease: "${{ contains(github.ref, '-rc') }}"
           title: "${{ env.OPL_VERSION }}"
           files: |
-            OPNPS2LD-${{ env.OPL_VERSION }}.7z
-            OPNPS2LD-VARIANTS-${{ env.OPL_VERSION }}.7z
-            OPNPS2LD-LANGS-${{ env.OPL_VERSION }}.7z
-            OPNPS2LD.7z
-            OPNPS2LD-VARIANTS.7z
-            OPNPS2LD-LANGS.7z
-            OPNPS2LD.ELF
+            FGOPL-${{ env.OPL_VERSION }}.7z
+            FGOPL-VARIANTS-${{ env.OPL_VERSION }}.7z
+            FGOPL-LANGS-${{ env.OPL_VERSION }}.7z
+            FGOPL.7z
+            FGOPL-VARIANTS.7z
+            FGOPL-LANGS.7z
+            FGOPL.ELF
             FGOPL-1.2.9.iso
