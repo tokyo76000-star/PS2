@@ -27,13 +27,13 @@ jobs:
       - name: Compile -> make clean release
         run: |
           make --trace clean release
-          # 自动兼容重命名，确保无论生成的是 opl.elf 还是 OPNPS2LD 都能统一
-          if [ -f opl.elf ]; then
-            cp opl.elf FGOPL-${{ env.OPL_VERSION }}.ELF
-            cp opl.elf OPNPS2LD-${{ env.OPL_VERSION }}.ELF
-          elif [ -f OPNPS2LD.ELF ]; then
-            cp OPNPS2LD.ELF FGOPL-${{ env.OPL_VERSION }}.ELF
-            cp OPNPS2LD.ELF OPNPS2LD-${{ env.OPL_VERSION }}.ELF
+          # 如果 Makefile 生成的是 OPNPS2LD，则将其重命名为 FGOPL，确保使用的是 ps2-packer 压缩后的 2.15MB 成品
+          if ! ls FGOPL-*.ELF 1> /dev/null 2>&1; then
+            if ls OPNPS2LD-*.ELF 1> /dev/null 2>&1; then
+              cp OPNPS2LD-*.ELF FGOPL-${{ env.OPL_VERSION }}.ELF
+            elif [ -f OPNPS2LD.ELF ]; then
+              cp OPNPS2LD.ELF FGOPL-${{ env.OPL_VERSION }}.ELF
+            fi
           fi
 
       - name: Create detailed changelog
@@ -44,9 +44,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: FGOPL
-          path: |
-            FGOPL-*.ELF
-            OPNPS2LD-*.ELF
+          path: FGOPL-*.ELF
 
       - name: Build ISO
         env:
@@ -54,9 +52,8 @@ jobs:
         run: |
           (apk add --no-cache xorriso || (apt-get update && apt-get install -y xorriso))
           mkdir -p iso_root
-          # 自动寻找编译出来的任意 ELF 文件放入 ISO 根目录
-          SRC_ELF=$(ls FGOPL-*.ELF OPNPS2LD*.ELF *.ELF 2>/dev/null | head -n 1)
-          cp "$SRC_ELF" iso_root/FENG_001.29 || true
+          SRC_ELF=$(ls FGOPL-*.ELF 2>/dev/null | head -n 1)
+          cp "$SRC_ELF" iso_root/FENG_001.29
           printf 'BOOT2 = cdrom0:\\FENG_001.29;1\r\nVER = 1.00\r\n' > iso_root/SYSTEM.CNF
           SYSAREA_OPT=""
           if [ -n "$PS2_SYSAREA_B64" ]; then
@@ -255,9 +252,7 @@ jobs:
           cp -f FGOPL-${{ env.OPL_VERSION }}.7z FGOPL.7z
           cp -f FGOPL-VARIANTS-${{ env.OPL_VERSION }}.7z FGOPL-VARIANTS.7z
           cp -f FGOPL-LANGS-${{ env.OPL_VERSION }}.7z FGOPL-LANGS.7z
-          # 自动寻找存在的 ELF 并复制为最终发布的 FGOPL.ELF
-          FINAL_ELF=$(ls FGOPL/*.ELF 2>/dev/null | head -n 1)
-          cp -f "$FINAL_ELF" FGOPL.ELF
+          cp -f FGOPL/FGOPL-${{ env.OPL_VERSION }}.ELF FGOPL.ELF
           cp -f FGOPL-ISO/FGOPL-1.2.9.iso FGOPL-1.2.9.iso || true
 
       - name: Create prerelease
