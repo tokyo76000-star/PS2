@@ -100,7 +100,18 @@ static void StStartFillStreamBuffer(void)
         DPRINTF("StmCallback: Rescheduling read.\n");
         StmScheduleClock.lo = 0x00704000;
         StmScheduleClock.hi = 0;
-        SetAlarm(&StmScheduleClock, &StmScheduleCb, &cdvdman_stat.StreamingData);
+        if (SetAlarm(&StmScheduleClock, &StmScheduleCb, &cdvdman_stat.StreamingData) < 0) {
+            /*
+             * 闹钟设置失败时无法延后重排：线程上下文里延时约 200ms（与闹钟间隔一致）
+             * 后直接重试填充一次；仍失败或处于中断上下文时，交给下一次 sceCdStRead
+             * 或下一块读完再触发。
+             */
+            DPRINTF("StmCallback: SetAlarm failed.\n");
+            if (!QueryIntrContext()) {
+                DelayThread(200 * 1000);
+                StFillStreamBuffer();
+            }
+        }
     }
 }
 
