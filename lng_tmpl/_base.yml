@@ -64,9 +64,9 @@ gui_strings:
 - label: MENU
   string: 菜单
 - label: BDM_GAMES
-  string: 硬盘游戏
+  string: 闪存游戏
 - label: HDD_GAMES
-  string: 内置游戏
+  string: 硬盘游戏
 - label: NET_GAMES
   string: 网络游戏
 - label: APPS
@@ -163,9 +163,9 @@ gui_strings:
 - label: REFRESH
   string: 刷新
 - label: BDMMODE
-  string: 硬盘模式
+  string: 外设模式
 - label: HDDMODE
-  string: 内置模式
+  string: 硬盘模式
 - label: ETHMODE
   string: 网络模式
 - label: APPMODE
