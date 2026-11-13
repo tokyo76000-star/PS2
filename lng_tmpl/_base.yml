@@ -64,9 +64,9 @@ gui_strings:
 - label: MENU
   string: 菜单
 - label: BDM_GAMES
-  string: 外设游戏
-- label: HDD_GAMES
   string: 硬盘游戏
+- label: HDD_GAMES
+  string: 内置游戏
 - label: NET_GAMES
   string: 网络游戏
 - label: APPS
@@ -163,9 +163,9 @@ gui_strings:
 - label: REFRESH
   string: 刷新
 - label: BDMMODE
-  string: 外设模式
-- label: HDDMODE
   string: 硬盘模式
+- label: HDDMODE
+  string: 内置模式
 - label: ETHMODE
   string: 网络模式
 - label: APPMODE
@@ -275,7 +275,7 @@ gui_strings:
 - label: RESET
   string: 重置
 - label: USE_GENERIC
-  string: 使用通用记忆卡
+  string: 使用实体记忆卡
 - label: VMC_SCREEN
   string: 设置虚拟记忆卡
 - label: VMC_NAME
@@ -421,7 +421,7 @@ gui_strings:
 - label: NET_UPDATE_ALL
   string: 覆盖现有记录
 - label: NET_UPDATE_FAILED
-  string: 更新失败。
+  string: 更新失败
 - label: NET_UPDATE_CONN_FAILED
   string: 连接更新服务器失败
 - label: NET_UPDATE_DONE
@@ -455,7 +455,7 @@ gui_strings:
 - label: PADEMU_MODE
   string: 手柄模拟模式
 - label: HINT_PADEMU_MODE
-  string: 选择手柄模拟模式
+  string: 选择手柄模式
 - label: DS34USB_MODE
   string: 有线连接
 - label: DS34BT_MODE
@@ -549,7 +549,7 @@ gui_strings:
 - label: BOOT_SND_VOLUME
   string: 启动音量
 - label: CFM_VMODE_CHG
-  string: 确认更改视频模式？
+  string: 确认更改模式？
 - label: CACHE_HDD_GAME_LIST
   string: 硬盘列表缓存
 - label: ENABLE_NOTIFICATIONS
@@ -669,7 +669,7 @@ gui_strings:
 - label: FULL_SCREEN
   string: 全屏
 - label: OSD_SETTINGS_VMODE
-  string: 视频模式
+  string: 图像模式
 - label: SYSTEM_DEFAULT
   string: 系统默认
 - label: BGM
@@ -689,7 +689,7 @@ gui_strings:
 - label: YSENSITIVITY
   string: 纵向灵敏度
 - label: FILE_COUNT
-  string: 'Files found: %i'
+  string: '找到文件: %i'
 - label: CHEAT_SELECTION
   string: 金手指选择
 - label: HDD_HINT
