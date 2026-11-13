@@ -64,9 +64,9 @@ gui_strings:
 - label: MENU
   string: 菜单
 - label: BDM_GAMES
-  string: 闪存游戏
-- label: HDD_GAMES
   string: 硬盘游戏
+- label: HDD_GAMES
+  string: 内置游戏
 - label: NET_GAMES
   string: 网络游戏
 - label: APPS
