@@ -235,7 +235,7 @@ gui_strings:
 - label: RUN
   string: 运行
 - label: GFX_SETTINGS
-  string: 菜单设置
+  string: 界面设置
 - label: ENABLE_WRITE
   string: 改名删除功能
 - label: LASTPLAYED
@@ -311,7 +311,7 @@ gui_strings:
 - label: HDD_SPINDOWN
   string: 硬盘自动休眠
 - label: VMODE
-  string: 影片模式
+  string: 分辨率
 - label: UICOLOR
   string: 对话框颜色
 - label: SELCOLOR
@@ -375,7 +375,7 @@ gui_strings:
 - label: GSM_SETTINGS
   string: 画面设置
 - label: ENABLEGSM
-  string: 图形选择
+  string: 屏幕调整
 - label: HINT_ENABLEGSM
   string: 切换画面开关
 - label: HINT_GSMVMODE
@@ -517,7 +517,7 @@ gui_strings:
 - label: HINT_PADEMU_WORKAROUND
   string: 部分假PS3手柄需要开启此选项
 - label: GSM_FIELD_FIX
-  string: 模拟播片扫描方式切换
+  string: 视频修正
 - label: HINT_GSM_FIELD_FIX
   string: 修正逐行模式下视频播放有问题的游戏
 - label: PARENLOCKCONFIG
@@ -657,7 +657,7 @@ gui_strings:
 - label: LANGUAGE_SIMPL_CHINESE
   string: 简体中文
 - label: OSD_SETTINGS
-  string: 图像设置
+  string: 菜单设置
 - label: OSD_SETTINGS_LNG
   string: 屏幕菜单语言
 - label: HINT_OSD_SETTINGS_LNG
